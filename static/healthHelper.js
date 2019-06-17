@@ -39,7 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // UNIT TESTS
 
-function lowCheck () {
+function testLowAltitude() {
+    let start = Date.now();
+    let end = Date.now() + 1000;
+    while (end > start) {
+        const dataPoint = { altitude: 150 + (20 * Math.random()), last_updated: start };
+        lowCheck(dataPoint);
+        start = Date.now();
+    }
+    return this.message !== 'Altitude is A-OK';
+}
+
+function testLowAltitude () {
     let start = Date.now();
     let end = Date.now() + 10000;
     while (end > start) {
@@ -50,7 +61,7 @@ function lowCheck () {
     return this.message !== 'WARNING: RAPID ORBITAL DECAY IMMINENT';
 }
 
-function changeArr () {
+function testLowAltitudeChange () {
     let start = Date.now();
     let end = Date.now() + 100000;
     while (end > start) {

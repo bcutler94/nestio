@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => fetch('http://nestio.space/api/satellite/data')
         .then(data => data.json())
         .then(response => {
-            checker(response);
             this.dataArray.push(response);
             const p1 = document.getElementById('average');
             const p2 = document.getElementById('min');
