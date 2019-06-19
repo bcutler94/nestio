@@ -63,6 +63,20 @@ expectedBool = true;
 expected = [expectedArr, expectedMessage, expectedBool];
 assertEqual(actual, expected, desc);
 
+desc = 'Recovery altitude test';
+timeNow = Date.now();
+timeFuture = Date.now() + 100000;
+testArr = [{ last_updated: timeNow, altitude: 159 }];
+testRes = { last_updated: timeFuture, altitude: 150 };
+testMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT';
+testBool = false;
+actual = lowCheck(testRes, testArr, testMessage, testBool);
+testRes = { last_updated: timeFuture, altitude: 170 };
+expectedArr = [{ last_updated: timeNow, altitude: 159 }, { last_updated: timeFuture, altitude: 150 }, { last_updated: timeFuture, altitude: 170 }];
+expectedMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT'
+expectedBool = true;
+expected = [expectedArr, expectedMessage, expectedBool];
+assertEqual(actual, expected, desc);
 
 
 function assertEqual(act, exp, desc) {
