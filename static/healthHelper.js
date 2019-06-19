@@ -1,9 +1,3 @@
-this.lowArray = [];
-this.message = 'Altitude is A-OK';
-this.recover = false;
-this.recoverStartTime;
-this.recoverEndTime;
-
 function lowCheck(response) {
     if (response.altitude < 160) {
         this.lowArray.push(response);
@@ -28,6 +22,11 @@ function lowCheck(response) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    this.lowArray = [];
+    this.message = 'Altitude is A-OK';
+    this.recover = false;
+    this.recoverStartTime;
+    this.recoverEndTime;
     setInterval(() => fetch('http://nestio.space/api/satellite/data')
         .then(data => data.json())
         .then(response => {

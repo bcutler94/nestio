@@ -1,33 +1,31 @@
-this.dataArray = [];
-
-function clearArray() {
-    if (this.dataArray.length > 2) {
-        const first = this.dataArray[0].last_updated;
-        const last = this.dataArray[this.dataArray.length - 1].last_updated;
+function clearArray(arr) {
+    if (arr.length > 2) {
+        const first = arr[0].last_updated;
+        const last = arr[arr.length - 1].last_updated;
         const diff = last - first;
-        if (diff / 1000 / 60 > 5) this.dataArray = [];
+        if (diff / 1000 / 60 > 5) arr = [];
     }
 }
 
-function getAverage() {
+function getAverage(arr) {
     let sum = 0;
-    for (let num of this.dataArray) {
+    for (let num of arr) {
         sum += num.altitude;
     }
-    return sum / this.dataArray.length;
+    return sum / arr.length;
 }
 
-function getMin() {
+function getMin(arr) {
     let min = Infinity;
-    for (let num of this.dataArray) {
+    for (let num of arr) {
         if (num.altitude < min) min = num.altitude;
     }
     return min;
 }
 
-function getMax() {
+function getMax(arr) {
     let max = -Infinity;
-    for (let num of this.dataArray) {
+    for (let num of arr) {
         if (num.altitude > max) max = num.altitude;
     }
     return max;
@@ -38,20 +36,21 @@ function clear() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const dataArray = [];
     setInterval(() => fetch('http://nestio.space/api/satellite/data')
         .then(data => data.json())
         .then(response => {
-            this.dataArray.push(response);
+            dataArray.push(response);
             const p1 = document.getElementById('average');
             const p2 = document.getElementById('min');
             const p3 = document.getElementById('max');
-            this.average = getAverage();
-            this.minimum = getMin();
-            this.maximum = getMax();
-            p1.innerHTML = this.average;
-            p2.innerHTML = this.minimum;
-            p3.innerHTML = this.maximum;
-            clearArray();
+            const average = getAverage(dataArray);
+            const minimum = getMin(dataArray);
+            const maximum = getMax(dataArray);
+            p1.innerHTML = average;
+            p2.innerHTML = minimum;
+            p3.innerHTML = maximum;
+            clearArray(dataArray);
         }), 1000);
 });
 
