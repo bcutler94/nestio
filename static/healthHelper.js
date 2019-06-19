@@ -1,4 +1,11 @@
-function lowCheck(response, arr, message, bool) {
+function lowCheck(response, arr, message, bool, timer) {
+    if (timer) {
+        if (Date.now() - timer >= 60000) {
+            timer = null;
+            message = 'Altitude is A-OK';
+        } 
+    }
+
     if (response.altitude < 160) {
         arr.push(response);
         const first = arr[0].last_updated;
@@ -9,29 +16,31 @@ function lowCheck(response, arr, message, bool) {
             bool = true;
         }
     } else {
+        arr = [];
         if (bool) {
-            setTimeout(() => message = 'Sustained Low Earth Orbit Resumed', 10000);
+            message = 'Sustained Low Earth Orbit Resumed'
+            timer = Date.now();
             bool = false;
         } else {
-            arr = [];
             message = 'Altitude is A-OK';
         } 
     }
-    return [arr, message, bool];
+    return [arr, message, bool, timer];
 }
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     let lowArray = [];
-//     let message = 'Altitude is A-OK';
-//     let recover = false;
-//     setInterval(() => fetch('http://nestio.space/api/satellite/data')
-//         .then(data => data.json())
-//         .then(response => {
-//             [lowArray, message, recover] = lowCheck(response, lowArray, message, recover);
-//             const div = document.getElementById('status');
-//             div.innerHTML = message;
-//         }), 1000);
-// });
+document.addEventListener('DOMContentLoaded', () => {
+    let lowArray = [];
+    let message = 'Altitude is A-OK';
+    let recover = false;
+        let recoveryTimer = null;
+    setInterval(() => fetch('http://nestio.space/api/satellite/data')
+        .then(data => data.json())
+        .then(response => {
+            [lowArray, message, recover] = lowCheck(response, lowArray, message, recover);
+            const div = document.getElementById('status');
+            div.innerHTML = message;
+        }), 1000);
+});
 
 // UNIT TESTS
 
@@ -42,7 +51,8 @@ let testArr = [{ last_updated: timeNow, altitude: 161 }];
 let testRes = {last_updated: timeFuture, altitude: 175};
 let testMessage = 'Altitude is A-OK';
 let testBool = false;
-let actual = lowCheck(testRes, testArr, testMessage, testBool);
+let testTimer = null;
+let actual = lowCheck(testRes, testArr, testMessage, testBool, testTimer);
 let expectedArr = [];
 let expectedMessage = 'Altitude is A-OK'
 let expectedBool = false;
@@ -54,9 +64,9 @@ timeNow = Date.now();
 timeFuture = Date.now() + 100000;
 testArr = [{ last_updated: timeNow, altitude: 159 }];
 testRes = { last_updated: timeFuture, altitude: 150 };
-testMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT';
+testMessage = 'Altitude is A-OK';
 testBool = false;
-actual = lowCheck(testRes, testArr, testMessage, testBool);
+actual = lowCheck(testRes, testArr, testMessage, testBool, testTimer);
 expectedArr = [{ last_updated: timeNow, altitude: 159 }, { last_updated: timeFuture, altitude: 150 }];
 expectedMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT'
 expectedBool = true;
@@ -70,11 +80,12 @@ testArr = [{ last_updated: timeNow, altitude: 159 }];
 testRes = { last_updated: timeFuture, altitude: 150 };
 testMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT';
 testBool = false;
-actual = lowCheck(testRes, testArr, testMessage, testBool);
+[testArr, testMessage, testBool, testTimer] = lowCheck(testRes, testArr, testMessage, testBool, testTimer);
 testRes = { last_updated: timeFuture, altitude: 170 };
-expectedArr = [{ last_updated: timeNow, altitude: 159 }, { last_updated: timeFuture, altitude: 150 }, { last_updated: timeFuture, altitude: 170 }];
-expectedMessage = 'WARNING: RAPID ORBITAL DECAY IMMINENT'
-expectedBool = true;
+actual = lowCheck(testRes, testArr, testMessage, testBool, testTimer);
+expectedArr = [];
+expectedMessage = 'Sustained Low Earth Orbit Resumed';
+expectedBool = false;
 expected = [expectedArr, expectedMessage, expectedBool];
 assertEqual(actual, expected, desc);
 
