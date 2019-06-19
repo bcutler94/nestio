@@ -1,38 +1,35 @@
-function lowCheck(response) {
+function lowCheck(response, arr, message, bool) {
     if (response.altitude < 160) {
-        this.lowArray.push(response);
-        const first = this.lowArray[0].last_updated;
-        const last = this.lowArray[this.lowArray.length - 1].last_updated;
+        arr.push(response);
+        const first = arr[0].last_updated;
+        const last = arr[arr.length - 1].last_updated;
         const diffBool = (last - first) / 1000 / 60;
-        if (this.lowArray.length >= 2 && diffBool > 1) {
-            this.message = 'WARNING: RAPID ORBITAL DECAY IMMINENT';
-            this.recover = true;
-            
+        if (arr.length >= 2 && diffBool > 1) {
+            message = 'WARNING: RAPID ORBITAL DECAY IMMINENT';
+            bool = true;
         }
     } else {
-        if (this.recover) {
-            setTimeout(() => this.message = 'Sustained Low Earth Orbit Resumed', 10000);
-            this.recover = false;
+        if (bool) {
+            setTimeout(() => message = 'Sustained Low Earth Orbit Resumed', 10000);
+            bool = false;
         } else {
-            this.lowArray = [];
-            this.message = 'Altitude is A-OK';
-        }
-        
+            arr = [];
+            message = 'Altitude is A-OK';
+        } 
     }
+    return [arr, message, bool];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    this.lowArray = [];
-    this.message = 'Altitude is A-OK';
-    this.recover = false;
-    this.recoverStartTime;
-    this.recoverEndTime;
+    const lowArray = [];
+    let message = 'Altitude is A-OK';
+    let recover = false;
     setInterval(() => fetch('http://nestio.space/api/satellite/data')
         .then(data => data.json())
         .then(response => {
-            lowCheck(response);
+            [lowArray, message, recover] = lowCheck(response, lowArray, message, recover);
             const div = document.getElementById('status');
-            div.innerHTML = this.message;
+            div.innerHTML = message;
         }), 1000);
 });
 
